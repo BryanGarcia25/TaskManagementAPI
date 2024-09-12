@@ -1,0 +1,19 @@
+{
+  "name": "task-management-api",
+  "version": "1.0.0",
+  "description": "API to handle requests sent from a web application for task management",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BryanGarcia25/TaskManagementAPI.git"
+  },
+  "author": "Bryan Garcia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BryanGarcia25/TaskManagementAPI/issues"
+  },
+  "homepage": "https://github.com/BryanGarcia25/TaskManagementAPI#readme"
+}
