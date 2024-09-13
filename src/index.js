@@ -19,6 +19,11 @@ app.listen(PORT, () => {
     console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
+let tasks = [
+    { id: 1, title: 'Tarea 1', description: 'Realizar tarea 1', dueDate: '12/09/2024 00:00:00', completed: false },
+    { id: 2, title: 'Tarea 2', description: 'Realizar tarea 2', dueDate: '12/09/2024 00:00:00', completed: true },
+]
+
 app.post('/register', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -80,6 +85,51 @@ const verifyToken = (req, res, next) => {
     });
 }
 
-app.get('/ruta', verifyToken, (req, res) => {
-    res.json( { message: `Hola ${req.user.username}, tienes un token válido` } );
-})
+app.get('/tasks', verifyToken, (req, res) => {
+    res.json(tasks);
+});
+
+app.get('/tasks/:id', verifyToken, (req, res) => {
+    const taskFound = tasks.find(t => t.id === parseInt(req.params.id));
+    if (!taskFound) {
+        return res.status(404).json( { message: 'Tarea no existente' } );
+    }
+    res.json(taskFound);
+});
+
+app.post('/createTask', verifyToken, (req, res) => {
+    const newTask = {
+        id: tasks.length + 1,
+        title: req.body.title,
+        description: req.body.description,
+        dueDate: req.body.dueDate,
+        completed: false,
+    }
+
+    tasks.push(newTask);
+    res.status(201).json( { message: 'Tarea registrada correctamente', newTask: newTask } );
+});
+
+app.put('/updateTask/:id', verifyToken, (req, res) => {
+    const taskFound = tasks.find(t => t.id === parseInt(req.params.id))
+    if (!taskFound) {
+        return res.status(404).json( { message: 'Tarea no existente' } );
+    }
+
+    taskFound.title = req.body.title || taskFound.title;
+    taskFound.description = req.body.description || taskFound.description;
+    taskFound.dueDate = req.body.dueDate || taskFound.dueDate;
+    taskFound.completed = req.body.completed !== undefined ? req.body.completed : taskFound.completed;
+    res.json( { message: 'Tarea actualizada correctamente', taskUpdated: taskFound } );
+});
+
+app.delete('/deleteTask/:id', verifyToken, (req, res) => {
+    const taskIndex = tasks.findIndex(t => t.id === parseInt(req.params.id));
+
+    if (taskIndex === -1) {
+        return res.status(404).json( { message: 'Tarea no existente' } );
+    }
+
+    const taskDeleted = tasks.splice(taskIndex, 1);
+    res.json( { message: 'Tarea eliminada correctamente', taskDeleted: taskDeleted } );
+});
