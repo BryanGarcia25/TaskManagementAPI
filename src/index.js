@@ -55,10 +55,31 @@ app.post('/login', async (req, res) => {
 
         const token = jwt.sign( { username: user.username }, `${process.env.JWT_SECRET}`, { expiresIn: "1d" } );
 
-        res.json(token);
+        res.json( { token } );
     } catch (error) {
         console.log(error);
         
         res.status(500).json( { message: 'Servidor fuera de servicio' } );
     }
 });
+
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json( { message: 'Acceso denegado. Token requerido' } );
+    }
+
+    jwt.verify(token, `${process.env.JWT_SECRET}`, (err, user) => {
+        if (err) {
+            return res.status(403).json( { message: 'Token inválido' } );
+        }
+        req.user = user;
+        next();
+    });
+}
+
+app.get('/ruta', verifyToken, (req, res) => {
+    res.json( { message: `Hola ${req.user.username}, tienes un token válido` } );
+})
