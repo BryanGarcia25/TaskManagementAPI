@@ -1,8 +1,15 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const generateAccessToken = require('../utils/generateToken');
+const validator = require('../validators/authValidator')
 
 exports.registerUser = async (req, res) => {
+    const error = validator.validateRegisterForm(req.body);
+
+    if (error) {
+        return res.status(400).json( { message: 'Error en la validación de datos', error: error.error.details[0].message } );
+    }
+    
     const { username, email, password } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
