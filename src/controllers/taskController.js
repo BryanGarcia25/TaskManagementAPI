@@ -1,7 +1,14 @@
 const Task = require('../models/task');
+const validator = require('../validators/taskValidator');
 
 exports.createTask = async (req, res) => {
     
+    const { error } = validator.validateTaskForm(req.body);
+
+    if (error) {
+        return res.status(400).json( { message: 'Error en la validación de datos', error: error.details[0].message } );
+    }
+
     try {
         const newTask = new Task({
             title: req.body.title,
@@ -11,7 +18,6 @@ exports.createTask = async (req, res) => {
         });
         
         const taskSaved = await newTask.save();
-        console.log(req.body);
         res.status(201).json( { message: 'Tarea registrada correctamente', task: taskSaved } );
     } catch (error) {
         res.status(500).json( { message: 'Error en el servidor al guardar la tarea' } );
